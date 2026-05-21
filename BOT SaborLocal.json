@@ -1,0 +1,306 @@
+{
+  "name": "BOT SaborLocal",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        -112
+      ],
+      "id": "telegram-trigger-node",
+      "name": "Telegram Trigger",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=Você é o atendente virtual do 'Sabor Local'. Não use emojis, sempre dê as informações em tópicos e seja direto.\n\nAo mostrar produtos, separe por categorias.\n\nItens do cardápio:\n{{ JSON.stringify($('HTTP Request').item.json.PRODUTO1, null, 2) }}\n\nFAQ:\n{{ JSON.stringify($('HTTP Request').item.json.FAQ1, null, 2) }}\n\nAo cadastrar endereço:\n- Solicite CPF\n- Solicite CEP\n- Valide ambos\n- Utilize a ferramenta cadastrar_endereco\n\nPedidos:\n{{ JSON.stringify($('HTTP Request').item.json.PEDIDO1, null, 2) }}\n\nClientes:\n{{ JSON.stringify($('HTTP Request').item.json.CLIENTE1, null, 2) }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        -112
+      ],
+      "id": "ai-agent-node",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -112
+      ],
+      "id": "telegram-send-message-node",
+      "name": "Send a text message",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        80
+      ],
+      "id": "gemini-model-node",
+      "name": "Google Gemini Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "url": "{{ $env.XANO_API_URL }}/ContextoBot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        -112
+      ],
+      "id": "http-request-node",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 8
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        176
+      ],
+      "id": "memory-node",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Ferramenta para cadastro de endereço",
+        "method": "POST",
+        "url": "{{ $env.XANO_API_URL }}/endereco",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "cpf",
+              "value": "={{ $fromAI('cpf', '', 'string') }}"
+            },
+            {
+              "name": "cep2",
+              "value": "={{ $fromAI('cep', '', 'string') }}"
+            },
+            {
+              "name": "logradouro",
+              "value": "={{ $fromAI('logradouro', '', 'string') }}"
+            },
+            {
+              "name": "numero",
+              "value": "={{ $fromAI('numero', '', 'string') }}"
+            },
+            {
+              "name": "bairro",
+              "value": "={{ $fromAI('bairro', '', 'string') }}"
+            },
+            {
+              "name": "complemento",
+              "value": "={{ $fromAI('complemento', '', 'string') }}"
+            },
+            {
+              "name": "referencia",
+              "value": "={{ $fromAI('referencia', '', 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        928,
+        160
+      ],
+      "id": "tool-cadastrar-endereco",
+      "name": "cadastrar_endereco"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Cria pedido com base no CPF",
+        "method": "POST",
+        "url": "{{ $env.XANO_API_URL }}/pedidoBot",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "cpf",
+              "value": "={{ $fromAI('cpf', '', 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        160
+      ],
+      "id": "tool-criar-pedido",
+      "name": "criarPedido"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Adiciona item ao pedido",
+        "method": "POST",
+        "url": "{{ $env.XANO_API_URL }}/itemBot",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "cpf",
+              "value": "={{ $fromAI('cpf', '', 'string') }}"
+            },
+            {
+              "name": "nomeProduto",
+              "value": "={{ $fromAI('nomeProduto', '', 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        784,
+        160
+      ],
+      "id": "tool-add-item",
+      "name": "addItem"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cadastrar_endereco": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "criarPedido": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "addItem": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "tags": [
+    "public",
+    "portfolio",
+    "ai-agent"
+  ]
+}
+
