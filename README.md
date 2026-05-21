@@ -1,4 +1,4 @@
-# 🍽️ Sabor Local AI Bot
+# 🍽️ ChatBot Sabor Local
 
 Bot inteligente de atendimento e automação de pedidos desenvolvido com n8n, Xano, Telegram e IA generativa utilizando Gemini.
 
