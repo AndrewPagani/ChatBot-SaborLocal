@@ -4,6 +4,8 @@ Bot inteligente de atendimento e automação de pedidos desenvolvido com n8n, Xa
 
 O projeto simula um assistente virtual para restaurantes, permitindo atendimento automatizado, criação de pedidos, consulta de status, cadastro de endereço e interação contextual em tempo real.
 
+<img width="1672" height="793" alt="image" src="https://github.com/user-attachments/assets/d58a2abb-d16d-49c4-bcb1-6df5b6c137b4" />
+
 # 🚀 Tecnologias Utilizadas
 - n8n
 - Xano
