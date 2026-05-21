@@ -6,6 +6,8 @@ O projeto simula um assistente virtual para restaurantes, permitindo atendimento
 
 <img width="1672" height="793" alt="image" src="https://github.com/user-attachments/assets/d58a2abb-d16d-49c4-bcb1-6df5b6c137b4" />
 
+https://www.youtube.com/watch?v=vRQ1nonLMOs
+
 # 🚀 Tecnologias Utilizadas
 - n8n
 - Xano
