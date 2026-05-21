@@ -4,7 +4,7 @@ Bot inteligente de atendimento e automação de pedidos desenvolvido com n8n, Xa
 
 O projeto simula um assistente virtual para restaurantes, permitindo atendimento automatizado, criação de pedidos, consulta de status, cadastro de endereço e interação contextual em tempo real.
 
-🚀 Tecnologias Utilizadas
+# 🚀 Tecnologias Utilizadas
 - n8n
 - Xano
 - Telegram
@@ -44,3 +44,6 @@ Experiência mais natural para o usuário
 Agente inteligente utilizando Gemini
 Execução automática de ferramentas (tools)
 Fluxo orientado por prompts
+
+# 👨‍💻 Autor
+- Andrew Pagani - Estudante de Análise e Desenvolvimento de Sistemas
